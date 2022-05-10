@@ -119,10 +119,13 @@ target "sdk-extras" {
     ]
 }
 
-target "ld64-tgz" {
+group "ld64-tgz" {
+    targets = [for v in ["linux-amd64", "linux-arm64", "linux-armv7", "linux-armv6", "linux-386"]: "ld64-${v}-tgz"]
+}
+
+target "ld64-tgz-base" {
     context = "base"
     target = "ld64-tgz"
-    output = ["./ld64-tgz"]
     platforms = [
         "linux/386",
         "linux/amd64",
@@ -132,6 +135,32 @@ target "ld64-tgz" {
         "linux/arm/v7"
     ]
     cache-to = ["type=inline"]
+    output = ["./ld64-tgz"]
+}
+
+target "ld64-linux-amd64-tgz" {
+    inherits = ["ld64-tgz-base"]
+    platforms = ["linux/amd64"]
+}
+
+target "ld64-linux-arm64-tgz" {
+    inherits = ["ld64-tgz-base"]
+    platforms = ["linux/arm64"]
+}
+
+target "ld64-linux-armv7-tgz" {
+    inherits = ["ld64-tgz-base"]
+    platforms = ["linux/arm/v7"]
+}
+
+target "ld64-linux-armv6-tgz" {
+    inherits = ["ld64-tgz-base"]
+    platforms = ["linux/arm/v6"]
+}
+
+target "ld64-linux-386-tgz" {
+    inherits = ["ld64-tgz-base"]
+    platforms = ["linux/386"]
 }
 
 variable "BINUTILS_VERSION_ONLY" {
