@@ -5,6 +5,9 @@ ARG TEST_BASE_IMAGE=${TEST_BASE_TYPE}
 ARG TEST_WITH_DARWIN=false
 
 ARG SHADOW_VERSION=4.8.1
+ARG BINUTILS_VERSION=2.38
+# BINUTILS_PATCHES_VERSION defines version of aports to use for patches
+ARG BINUTILS_PATCHES_VERSION=3.16-stable
 
 FROM --platform=$BUILDPLATFORM alpine AS scripts
 COPY xx-* /out/
@@ -274,16 +277,15 @@ FROM scratch AS idmap-binaries
 COPY --from=idmap /usr/bin/newuidmap /usr/bin/newgidmap /
 
 FROM --platform=$BUILDPLATFORM alpine AS binutils-base0
-RUN apk add --no-cache git clang lld zlib-dev gcc patch make musl-dev
+RUN apk add --no-cache file git clang lld zlib-dev gcc patch make musl-dev bison flex texinfo
 WORKDIR /work
-# BINUTILS_PATCHES_VERSION defines version of aports to use for patches
-ARG BINUTILS_PATCHES_VERSION=3.13-stable
+ARG BINUTILS_PATCHES_VERSION
 RUN git clone --depth 1 -b ${BINUTILS_PATCHES_VERSION} https://github.com/alpinelinux/aports.git && \
     mkdir patches && \
     cp -a aports/main/binutils/*.patch patches/ && \
     rm -rf aports
 COPY --from=base / /
-ARG BINUTILS_VERSION=2.36.1
+ARG BINUTILS_VERSION
 RUN wget https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz
 ARG TARGETPLATFORM
 # first build version for current architecture that is used then cross compiling
@@ -295,8 +297,8 @@ RUN export CC=xx-clang CXX=xx-clang++ LD=lld BINUTILS_TARGET=${TARGETPLATFORM} &
     make -j $(nproc) && \
     make install && \
     cd ..  && rm -rf binutils-${BINUTILS_VERSION}
-
 RUN xx-apk add --no-cache musl-dev gcc g++ zlib-dev
+
 FROM binutils-base0 AS binutils-base
 ARG TARGETOS TARGETARCH TARGETVARIANT
 # BINUTILS_TARGET defines platform that binutils binaries will target when run
