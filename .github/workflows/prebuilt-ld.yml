@@ -11,6 +11,9 @@ on:
     branches:
       - 'master'
 
+env:
+  DIST: ./bin
+
 jobs:
   targets:
     runs-on: ubuntu-latest
@@ -55,18 +58,18 @@ jobs:
         with:
           targets: ${{ matrix.target }}
           set: |
-            *.output=./dist
+            *.output=${{ env.DIST }}
       -
         name: Move artifacts
         run: |
-          mv ./dist/**/* ./dist/ || true
+          mv ${{ env.DIST }}/**/* ${{ env.DIST }}/ || true
       -
         name: Upload artifacts
         if: ${{ inputs.release }}
         uses: actions/upload-artifact@v3
         with:
           name: prebuilt-ld
-          path: ./dist/*
+          path: ${{ env.DIST }}/*
           if-no-files-found: error
           retention-days: 5
 
@@ -89,13 +92,32 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: prebuilt-ld
-          path: ./dist
+          path: ./bin
       -
         name: GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           name: prebuilt/ld-${{ env.VERSION }}-${{ github.run_number }}
           tag_name: prebuilt/ld-${{ env.VERSION }}-${{ github.run_number }}
-          files: dist/*
+          files: ${{ env.DIST }}/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Generate base/xx-ld-shas
+        run: |
+          bash ./hack/generate-ld-shas.sh
+      -
+        name: Commit changes
+        run: |
+          git add -A .
+      -
+        name: Create PR
+        uses: peter-evans/create-pull-request@2b011faafdcbc9ceb11414d64d0573f37c774b04
+        with:
+          base: master
+          branch: bot/prebuilt-ld
+          commit-message: "update base/xx-ld-shas"
+          signoff: true
+          delete-branch: true
+          title: "Update `base/xx-ld-shas`"
+          draft: false
