@@ -135,7 +135,7 @@ target "ld64-tgz-base" {
         "linux/arm/v7"
     ]
     cache-to = ["type=inline"]
-    output = ["./ld64-tgz"]
+    output = ["./bin/prebuilt-ld"]
 }
 
 target "ld64-linux-amd64-tgz" {
@@ -304,7 +304,7 @@ target "ld-tgz-base" {
         "linux/ppc64le"
     ]
     cache-to = ["type=inline"]
-    output = ["./ld-tgz"]
+    output = ["./bin/prebuilt-ld"]
 }
 
 target "ld-linux-arm64-tgz" {
