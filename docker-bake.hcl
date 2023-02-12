@@ -268,9 +268,11 @@ target "ld-tgz-base" {
         BINUTILS_VERSION = BINUTILS_VERSION
     }
     platforms = [
+        "linux/386",
         "linux/amd64",
         "linux/arm64",
-        "linux/arm",
+        "linux/arm/v6",
+        "linux/arm/v7",
         "linux/s390x",
         "linux/ppc64le"
     ]
