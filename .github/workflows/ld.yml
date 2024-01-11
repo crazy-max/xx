@@ -96,11 +96,27 @@ jobs:
         uses: docker/bake-action@v4
         with:
           targets: ld64-static-tgz
-          provenance: false
           set: |
             ld64-static-tgz.cache-from=type=gha,scope=ld64-static-tgz
             ld64-static-tgz.cache-to=type=gha,scope=ld64-static-tgz
             ld64-static-tgz.output=type=local,dest=./dist,platform-split=false
+      -
+        name: Rename provenance
+        working-directory: ./dist
+        run: |
+          for tfile in *.tar.gz; do
+            os=$(echo "$tfile" | sed -E 's/^.+-(.+)-(.+)\.tar\.gz$/\1/')
+            arch=$(echo "$tfile" | sed -E 's/^.+-(.+)-(.+)\.tar\.gz$/\2/')
+            pfile="provenance.$os_${arch//_/}.json"
+            if [ -e "$pfile" ]; then
+              npfile="$(basename "tfile" .tar.gz).provenance.json"
+              mv "$pfile" "$npfile"
+              echo "Renamed $pfile to $npfile"
+            else
+              echo "Provenance file $pfile not found for $tfile." >&2
+              exit 1
+            fi
+          done
       -
         name: List artifacts
         run: |
@@ -159,11 +175,27 @@ jobs:
         uses: docker/bake-action@v4
         with:
           targets: ${{ matrix.target }}
-          provenance: false
           set: |
             *.cache-from=type=gha,scope=${{ matrix.target }}
             *.cache-to=type=gha,scope=${{ matrix.target }}
             *.output=type=local,dest=./dist,platform-split=false
+      -
+        name: Rename provenance
+        working-directory: ./dist
+        run: |
+          for tfile in *.tar.gz; do
+            os=$(echo "$tfile" | sed -E 's/^.+-(.+)-(.+)\.tar\.gz$/\1/')
+            arch=$(echo "$tfile" | sed -E 's/^.+-(.+)-(.+)\.tar\.gz$/\2/')
+            pfile="provenance.$os_${arch}.json"
+            if [ -e "$pfile" ]; then
+              npfile="$(basename "tfile" .tar.gz).provenance.json"
+              mv "$pfile" "$npfile"
+              echo "Renamed $pfile to $npfile"
+            else
+              echo "Provenance file $pfile not found for $tfile." >&2
+              exit 1
+            fi
+          done
       -
         name: List artifacts
         run: |
