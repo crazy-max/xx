@@ -96,6 +96,7 @@ jobs:
         uses: docker/bake-action@v4
         with:
           targets: ld64-static-tgz
+          provenance: false
           set: |
             ld64-static-tgz.cache-from=type=gha,scope=ld64-static-tgz
             ld64-static-tgz.cache-to=type=gha,scope=ld64-static-tgz
@@ -158,6 +159,7 @@ jobs:
         uses: docker/bake-action@v4
         with:
           targets: ${{ matrix.target }}
+          provenance: false
           set: |
             *.cache-from=type=gha,scope=${{ matrix.target }}
             *.cache-to=type=gha,scope=${{ matrix.target }}
